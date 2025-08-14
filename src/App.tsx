@@ -18,19 +18,23 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
+          {/* Public route for login */}
           <Route path="/login" element={<Login />} />
+          
+          {/* Protected routes */}
           <Route path="/" element={
             <ProtectedRoute>
               <Index />
             </ProtectedRoute>
           } />
+          
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           } />
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          
+          {/* Catch-all route for 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
