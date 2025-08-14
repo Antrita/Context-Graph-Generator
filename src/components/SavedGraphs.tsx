@@ -1,57 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { 
-  collection, 
-  query, 
-  where, 
-  orderBy, 
-  onSnapshot, 
-  deleteDoc, 
-  doc 
-} from 'firebase/firestore';
+import React, { useState } from 'react';
+import { deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/AuthContext';
+import { useSavedGraphs } from '../hooks/useSavedGraphs';
 import { format } from 'date-fns';
 
-interface SavedGraph {
-  id: string;
-  title: string;
-  description?: string;
-  graphData: any;
-  createdAt: any;
-  updatedAt: any;
+interface SavedGraphsProps {
+  onLoadGraph?: (graphData: any, graphId: string) => void;
 }
 
-const SavedGraphs: React.FC = () => {
+const SavedGraphs: React.FC<SavedGraphsProps> = ({ onLoadGraph }) => {
   const { user } = useAuth();
-  const [graphs, setGraphs] = useState<SavedGraph[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { graphs, loading, error } = useSavedGraphs();
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!user) return;
-
-    const graphsRef = collection(db, 'graphs');
-    const q = query(
-      graphsRef,
-      where('userId', '==', user.uid),
-      orderBy('updatedAt', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const graphsData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      })) as SavedGraph[];
-      
-      setGraphs(graphsData);
-      setLoading(false);
-    }, (error) => {
-      console.error('Error fetching graphs:', error);
-      setLoading(false);
-    });
-
-    return unsubscribe;
-  }, [user]);
 
   const handleDelete = async (graphId: string) => {
     try {
@@ -136,8 +97,9 @@ const SavedGraphs: React.FC = () => {
                 <div className="flex items-center space-x-2 ml-4">
                   <button
                     onClick={() => {
-                      // Load graph data into the editor
-                      console.log('Load graph:', graph);
+                      if (onLoadGraph) {
+                        onLoadGraph(graph.graphData, graph.id!);
+                      }
                     }}
                     className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
                   >
