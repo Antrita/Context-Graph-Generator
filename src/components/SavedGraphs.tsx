@@ -1,9 +1,27 @@
-import React, { useState } from 'react';
-import { deleteDoc, doc } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { 
+  collection, 
+  query, 
+  where, 
+  orderBy, 
+  onSnapshot, 
+  deleteDoc, 
+  doc 
+} from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from '../lib/AuthContext';
-import { useSavedGraphs } from '../hooks/useSavedGraphs';
 import { format } from 'date-fns';
+
+interface SavedGraph {
+  id: string;
+  title: string;
+  description?: string;
+  graphData: any;
+  createdAt: any;
+  updatedAt: any;
+  isPublic?: boolean;
+  tags?: string[];
+}
 
 interface SavedGraphsProps {
   onLoadGraph?: (graphData: any, graphId: string) => void;
@@ -11,8 +29,42 @@ interface SavedGraphsProps {
 
 const SavedGraphs: React.FC<SavedGraphsProps> = ({ onLoadGraph }) => {
   const { user } = useAuth();
-  const { graphs, loading, error } = useSavedGraphs();
+  const [graphs, setGraphs] = useState<SavedGraph[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      setGraphs([]);
+      setLoading(false);
+      return;
+    }
+
+    const graphsRef = collection(db, 'graphs');
+    const q = query(
+      graphsRef,
+      where('userId', '==', user.uid),
+      orderBy('updatedAt', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const graphsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as SavedGraph[];
+      
+      setGraphs(graphsData);
+      setLoading(false);
+      setError(null);
+    }, (error) => {
+      console.error('Error fetching graphs:', error);
+      setError('Failed to load saved graphs');
+      setLoading(false);
+    });
+
+    return unsubscribe;
+  }, [user]);
 
   const handleDelete = async (graphId: string) => {
     try {
@@ -20,6 +72,7 @@ const SavedGraphs: React.FC<SavedGraphsProps> = ({ onLoadGraph }) => {
       setDeleteConfirm(null);
     } catch (error) {
       console.error('Error deleting graph:', error);
+      setError('Failed to delete graph');
     }
   };
 
@@ -44,7 +97,6 @@ const SavedGraphs: React.FC<SavedGraphsProps> = ({ onLoadGraph }) => {
     );
   }
 
-  // Handle error state
   if (error) {
     return (
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -65,7 +117,11 @@ const SavedGraphs: React.FC<SavedGraphsProps> = ({ onLoadGraph }) => {
           <h3 className="mt-2 text-sm font-medium text-gray-900">Error loading graphs</h3>
           <p className="mt-1 text-sm text-red-600">{error}</p>
           <button
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              setError(null);
+              setLoading(true);
+              // The useEffect will re-run and fetch data again
+            }}
             className="mt-4 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
           >
             Try Again
