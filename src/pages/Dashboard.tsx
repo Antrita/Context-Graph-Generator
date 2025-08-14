@@ -1,11 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useAuth } from '../lib/AuthContext';
 import UserProfile from '../components/UserProfile';
 import SavedGraphs from '../components/SavedGraphs';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLoadGraph = (graphData: any, graphId: string) => {
+    // Navigate to main app with the loaded graph data
+    navigate('/', { 
+      state: { 
+        loadedGraphData: graphData,
+        loadedGraphId: graphId
+      } 
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -84,7 +95,7 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Saved Graphs */}
-        <SavedGraphs />
+        <SavedGraphs onLoadGraph={handleLoadGraph} />
       </main>
     </div>
   );
