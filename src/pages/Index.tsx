@@ -6,6 +6,7 @@ import TextEditor from '@/components/TextEditor';
 import ContextGraph from '@/components/ContextGraph';
 import { Button } from '@/components/ui/button';
 import { Brain, FileText, Network, BarChart3 } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';lucide-react';
 import { Link } from 'react-router-dom';
 
 import UserProfile from '@/components/UserProfile';
@@ -17,6 +18,11 @@ import { useToast } from '@/hooks/use-toast';
 const Index = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const location = useLocation();
+  
+  // Check if we're loading a graph from dashboard
+  const loadedGraphData = location.state?.loadedGraphData;
+  const loadedGraphId = location.state?.loadedGraphId;
   
   const [files, setFiles] = useState<FileNode[]>([
     {
@@ -100,8 +106,24 @@ This research connects closely with knowledge management and graph visualization
   
   const [selectedFileId, setSelectedFileId] = useState<string | null>('welcome');
   const [activeTab, setActiveTab] = useState('editor');
-  const [currentGraphId, setCurrentGraphId] = useState<string | null>(null);
+  const [currentGraphId, setCurrentGraphId] = useState<string | null>(loadedGraphId || null);
   const [isLoadingGraph, setIsLoadingGraph] = useState(false);
+
+  // Load graph data from dashboard navigation
+  useEffect(() => {
+    if (loadedGraphData && loadedGraphData.files) {
+      setFiles(loadedGraphData.files);
+      setSelectedFileId(loadedGraphData.selectedFileId || 'welcome');
+      setCurrentGraphId(loadedGraphId);
+      toast({
+        title: "Graph loaded successfully!",
+        description: "Your saved graph has been loaded from the dashboard.",
+      });
+      
+      // Clear the location state to prevent reloading on refresh
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [loadedGraphData, loadedGraphId, toast]);
 
   const selectedFile = findFileById(files, selectedFileId);
 
