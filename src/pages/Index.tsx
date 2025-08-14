@@ -7,6 +7,10 @@ import ContextGraph from '@/components/ContextGraph';
 import { Button } from '@/components/ui/button';
 import { Brain, FileText, Network } from 'lucide-react';
 
+import UserProfile from '@/components/UserProfile';
+import SaveGraphButton from '@/components/SaveGraphButton';
+import { useAuth } from '@/lib/AuthContext';
+
 const Index = () => {
   const [files, setFiles] = useState<FileNode[]>([
     {
