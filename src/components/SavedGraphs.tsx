@@ -44,6 +44,37 @@ const SavedGraphs: React.FC<SavedGraphsProps> = ({ onLoadGraph }) => {
     );
   }
 
+  // Handle error state
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="text-center">
+          <svg
+            className="mx-auto h-12 w-12 text-red-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">Error loading graphs</h3>
+          <p className="mt-1 text-sm text-red-600">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       <div className="p-6 border-b border-gray-200">
@@ -91,24 +122,42 @@ const SavedGraphs: React.FC<SavedGraphsProps> = ({ onLoadGraph }) => {
                     <span>Created {formatDate(graph.createdAt)}</span>
                     <span>•</span>
                     <span>Updated {formatDate(graph.updatedAt)}</span>
+                    {graph.isPublic && (
+                      <>
+                        <span>•</span>
+                        <span className="text-green-600">Public</span>
+                      </>
+                    )}
                   </div>
+                  {graph.tags && graph.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {graph.tags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex items-center space-x-2 ml-4">
                   <button
                     onClick={() => {
                       if (onLoadGraph) {
-                        onLoadGraph(graph.graphData, graph.id!);
+                        onLoadGraph(graph.graphData, graph.id);
                       }
                     }}
-                    className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                    className="px-3 py-1 text-sm text-blue-600 hover:text-blue-800 transition-colors border border-blue-200 rounded hover:bg-blue-50"
                   >
                     Load
                   </button>
                   
                   <button
                     onClick={() => setDeleteConfirm(graph.id)}
-                    className="px-3 py-1 text-sm text-red-600 hover:text-red-800 transition-colors"
+                    className="px-3 py-1 text-sm text-red-600 hover:text-red-800 transition-colors border border-red-200 rounded hover:bg-red-50"
                   >
                     Delete
                   </button>
@@ -123,12 +172,33 @@ const SavedGraphs: React.FC<SavedGraphsProps> = ({ onLoadGraph }) => {
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Delete Graph
-            </h3>
+            <div className="flex items-center mb-4">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-6 w-6 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Delete Graph
+                </h3>
+              </div>
+            </div>
+            
             <p className="text-sm text-gray-500 mb-6">
-              Are you sure you want to delete this graph? This action cannot be undone.
+              Are you sure you want to delete this graph? This action cannot be undone and all data will be permanently lost.
             </p>
+            
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
