@@ -6,8 +6,7 @@ import TextEditor from '@/components/TextEditor';
 import ContextGraph from '@/components/ContextGraph';
 import { Button } from '@/components/ui/button';
 import { Brain, FileText, Network, BarChart3 } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 import UserProfile from '@/components/UserProfile';
 import SaveGraphButton from '@/components/SaveGraphButton';
