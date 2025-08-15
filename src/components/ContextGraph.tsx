@@ -251,7 +251,7 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
     }
 
     // Initialize the 3D force graph
-    const graph = ForceGraph3D()(containerRef.current)
+    const graph = ForceGraph3D(containerRef.current)
       .graphData(graphData)
       .nodeId('id')
       .nodeLabel((node: any) => `
