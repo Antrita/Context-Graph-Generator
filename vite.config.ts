@@ -1,39 +1,40 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+import react from '@vitejs/plugin-react-swc'
+import path from "path"
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     },
-  },
-  define: {
-    global: 'globalThis',
-  },
-  optimizeDeps: {
-    include: ['3d-force-graph', 'three', 'd3'],
-    exclude: ['three/webgpu']
   },
   build: {
     rollupOptions: {
-      external: [],
       output: {
-        manualChunks: {
-          'three': ['three'],
-          '3d-force-graph': ['3d-force-graph'],
-          'd3': ['d3']
+        manualChunks: (id) => {
+          // Separate Three.js into its own chunk to avoid build issues
+          if (id.includes('three')) {
+            return 'three'
+          }
+          if (id.includes('d3')) {
+            return 'd3'
+          }
+          if (id.includes('node_modules')) {
+            return 'vendor'
+          }
         }
       }
     },
-    target: 'esnext',
+    chunkSizeWarningLimit: 2000,
     minify: 'esbuild'
   },
-  server: {
-    fs: {
-      allow: ['..']
-    }
+  optimizeDeps: {
+    include: ['d3'],
+    exclude: ['three/build/three.webgpu.js']
+  },
+  define: {
+    global: 'globalThis',
   }
 })
