@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FileExplorer, { FileNode } from '@/components/FileExplorer';
@@ -11,7 +11,6 @@ import { Link, useLocation } from 'react-router-dom';
 import UserProfile from '@/components/UserProfile';
 import SaveGraphButton from '@/components/SaveGraphButton';
 import { useAuth } from '@/lib/AuthContext';
-import { graphService } from '@/lib/graphService';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
@@ -106,14 +105,13 @@ This research connects closely with knowledge management and graph visualization
   const [selectedFileId, setSelectedFileId] = useState<string | null>('welcome');
   const [activeTab, setActiveTab] = useState('editor');
   const [currentGraphId, setCurrentGraphId] = useState<string | null>(loadedGraphId || null);
-  const [isLoadingGraph, setIsLoadingGraph] = useState(false);
 
   // Load graph data from dashboard navigation
   useEffect(() => {
     if (loadedGraphData && loadedGraphData.files) {
       setFiles(loadedGraphData.files);
       setSelectedFileId(loadedGraphData.selectedFileId || 'welcome');
-      setCurrentGraphId(loadedGraphId);
+      setCurrentGraphId(loadedGraphId || null);
       toast({
         title: "Graph loaded successfully!",
         description: "Your saved graph has been loaded from the dashboard.",
@@ -125,40 +123,6 @@ This research connects closely with knowledge management and graph visualization
   }, [loadedGraphData, loadedGraphId, toast]);
 
   const selectedFile = findFileById(files, selectedFileId);
-
-  // Load a saved graph
-  const loadSavedGraph = async (graphId: string) => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "Please sign in to load saved graphs.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoadingGraph(true);
-    try {
-      const graph = await graphService.getGraph(graphId, user.uid);
-      if (graph && graph.graphData) {
-        setFiles(graph.graphData.files || files);
-        setCurrentGraphId(graph.id);
-        toast({
-          title: "Graph loaded successfully!",
-          description: `Loaded "${graph.title}"`,
-        });
-      }
-    } catch (error) {
-      console.error('Error loading graph:', error);
-      toast({
-        title: "Error loading graph",
-        description: "Failed to load the saved graph.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoadingGraph(false);
-    }
-  };
 
   // Create graph data for saving
   const createGraphData = () => {
