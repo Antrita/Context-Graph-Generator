@@ -21,13 +21,10 @@ const App = () => (
           {/* Public route for login */}
           <Route path="/login" element={<Login />} />
           
-          {/* Protected routes */}
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Index />
-            </ProtectedRoute>
-          } />
+          {/* Main app - available to everyone (guests + authenticated users) */}
+          <Route path="/" element={<Index />} />
           
+          {/* Protected routes - require authentication */}
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
