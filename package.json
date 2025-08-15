@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build-check": "tsc && vite build",
+    "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -38,14 +37,13 @@
     "@radix-ui/react-toggle": "^1.0.3",
     "@radix-ui/react-toggle-group": "^1.0.4",
     "@radix-ui/react-tooltip": "^1.0.7",
-    "@tanstack/react-query": "^4.36.1",
-    "3d-force-graph": "^1.70.15",
+    "@tanstack/react-query": "^4.32.6",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
     "d3": "^7.8.5",
     "date-fns": "^2.30.0",
-    "embla-carousel-react": "^8.0.0",
+    "embla-carousel-react": "^8.0.0-rc22",
     "firebase": "^10.5.0",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.263.1",
@@ -55,23 +53,21 @@
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.45.4",
     "react-resizable-panels": "^0.0.55",
-    "react-router-dom": "^6.15.0",
+    "react-router-dom": "^6.16.0",
     "recharts": "^2.8.0",
     "sonner": "^1.4.3",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",
-    "three": "^0.168.0",
-    "vaul": "^0.7.0"
+    "vaul": "^0.9.0"
   },
   "devDependencies": {
     "@types/d3": "^7.4.0",
     "@types/node": "^20.5.2",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
-    "@types/three": "^0.168.0",
-    "@typescript-eslint/eslint-plugin": "^8.39.1",
-    "@typescript-eslint/parser": "^8.39.1",
-    "@vitejs/plugin-react": "^4.0.3",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitejs/plugin-react-swc": "^3.3.2",
     "autoprefixer": "^10.4.15",
     "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
@@ -80,8 +76,5 @@
     "tailwindcss": "^3.3.3",
     "typescript": "^5.0.2",
     "vite": "^4.4.5"
-  },
-  "overrides": {
-    "three": "^0.168.0"
   }
 }
