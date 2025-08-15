@@ -32,7 +32,7 @@ interface GraphLink {
 
 interface ContextGraphProps {
   files: FileNode[];
-  selectedFileId: string | null;
+  selectedFileId: string | null | undefined;
   onNodeClick: (fileId: string) => void;
 }
 
@@ -251,7 +251,8 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
     }
 
     // Initialize the 3D force graph
-    const graph = ForceGraph3D(containerRef.current)
+    const ForceGraph3DInstance = ForceGraph3D as any;
+    const graph = new ForceGraph3DInstance(containerRef.current)
       .graphData(graphData)
       .nodeId('id')
       .nodeLabel((node: any) => `
