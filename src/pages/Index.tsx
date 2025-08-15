@@ -285,20 +285,20 @@ Create files and folders to organize your thoughts and ideas.`,
   };
 
   return (
-    <div className="min-h-screen bg-gradient-background">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-gray-900">
+      {/* Dark Theme Header */}
+      <header className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-primary rounded-lg shadow-glow">
-                <Brain className="h-6 w-6 text-primary-foreground" />
+              <div className="p-2 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg shadow-lg">
+                <Brain className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+                <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                   Context Graph Generator
                 </h1>
-                <p className="text-sm text-muted-foreground hidden md:block">
+                <p className="text-sm text-gray-400 hidden md:block">
                   Discover connections in your knowledge network
                 </p>
               </div>
@@ -308,7 +308,7 @@ Create files and folders to organize your thoughts and ideas.`,
               {user && (
                 <>
                   <Link to="/dashboard">
-                    <Button variant="outline" size="sm" className="hidden md:flex items-center gap-2">
+                    <Button variant="outline" size="sm" className="hidden md:flex items-center gap-2 bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600 hover:text-white">
                       <BarChart3 className="h-4 w-4" />
                       Dashboard
                     </Button>
@@ -317,7 +317,7 @@ Create files and folders to organize your thoughts and ideas.`,
                     variant="outline" 
                     size="sm" 
                     onClick={handleNewGraph}
-                    className="hidden md:flex items-center gap-2"
+                    className="hidden md:flex items-center gap-2 bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600 hover:text-white"
                   >
                     <Brain className="h-4 w-4" />
                     New Graph
@@ -340,7 +340,7 @@ Create files and folders to organize your thoughts and ideas.`,
         <div className="mx-auto max-w-7xl">
           {/* Mobile header info */}
           <div className="mb-4 md:hidden">
-            <p className="text-muted-foreground text-sm">
+            <p className="text-gray-400 text-sm">
               Discover connections in your knowledge network
             </p>
           </div>
@@ -349,7 +349,7 @@ Create files and folders to organize your thoughts and ideas.`,
           {user && (
             <div className="flex gap-2 mb-4 md:hidden">
               <Link to="/dashboard" className="flex-1">
-                <Button variant="outline" size="sm" className="w-full">
+                <Button variant="outline" size="sm" className="w-full bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600">
                   <BarChart3 className="h-4 w-4 mr-2" />
                   Dashboard
                 </Button>
@@ -358,7 +358,7 @@ Create files and folders to organize your thoughts and ideas.`,
                 variant="outline" 
                 size="sm" 
                 onClick={handleNewGraph}
-                className="flex-1"
+                className="flex-1 bg-gray-700 border-gray-600 text-gray-300 hover:bg-gray-600"
               >
                 <Brain className="h-4 w-4 mr-2" />
                 New
@@ -373,18 +373,18 @@ Create files and folders to organize your thoughts and ideas.`,
 
           {/* Auth prompt for non-authenticated users */}
           {!user && (
-            <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="mb-6 bg-purple-900/20 border border-purple-700/50 rounded-lg p-4 backdrop-blur-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-sm font-medium text-blue-900">
+                  <h3 className="text-sm font-medium text-purple-300">
                     Save your work in the cloud
                   </h3>
-                  <p className="text-sm text-blue-700 mt-1">
+                  <p className="text-sm text-purple-200 mt-1">
                     Sign in to save, sync, and share your context graphs across devices.
                   </p>
                 </div>
                 <Link to="/login">
-                  <Button size="sm" className="ml-4">
+                  <Button size="sm" className="ml-4 bg-purple-600 hover:bg-purple-700 text-white">
                     Sign In
                   </Button>
                 </Link>
@@ -408,18 +408,18 @@ Create files and folders to organize your thoughts and ideas.`,
             
             <ResizablePanel defaultSize={75} minSize={50}>
               <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-                <div className="bg-gradient-card rounded-lg border border-border shadow-md">
+                <div className="bg-gray-800 rounded-lg border border-gray-700 shadow-md">
                   <TabsList className="grid w-full grid-cols-2 h-12 p-1 bg-transparent">
                     <TabsTrigger 
                       value="editor" 
-                      className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                      className="flex items-center gap-2 data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300"
                     >
                       <FileText className="h-4 w-4" />
                       Editor
                     </TabsTrigger>
                     <TabsTrigger 
                       value="graph"
-                      className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                      className="flex items-center gap-2 data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300"
                     >
                       <Network className="h-4 w-4" />
                       Graph
