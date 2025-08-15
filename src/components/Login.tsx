@@ -1,10 +1,18 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/AuthContext';
 import { Brain } from 'lucide-react';
 
 const Login: React.FC = () => {
-  const { signInWithGoogle, loading, error } = useAuth();
+  const { signInWithGoogle, loading, error, user } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect to main app after successful login
+  useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -88,6 +96,41 @@ const Login: React.FC = () => {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-500">
+                  or
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <Link
+            to="/"
+            className="group relative w-full flex justify-center py-3 px-6 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 transform hover:scale-105 mt-4"
+          >
+            <span className="absolute left-0 inset-y-0 flex items-center pl-4">
+              <svg
+                className="h-5 w-5 text-gray-400 group-hover:text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+            </span>
+            Continue as Guest
+          </Link>
+          
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-500">
                   Secure authentication with Google
                 </span>
               </div>
@@ -95,8 +138,22 @@ const Login: React.FC = () => {
           </div>
           
           <div className="text-center text-xs text-gray-500 mt-6 space-y-2">
-            <p>By signing in, you agree to our Terms of Service and Privacy Policy.</p>
-            <p>Your data is encrypted and stored securely in Firebase.</p>
+            <div>
+              <p className="font-medium text-gray-700">Guest Mode:</p>
+              <p>• Create and edit graphs locally</p>
+              <p>• View graph visualizations</p>
+              <p className="text-orange-600">• Cannot save or sync data</p>
+            </div>
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="font-medium text-gray-700">Signed-in Benefits:</p>
+              <p>• Save graphs to the cloud</p>
+              <p>• Sync across devices</p>
+              <p>• Access from anywhere</p>
+            </div>
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p>By signing in, you agree to our Terms of Service and Privacy Policy.</p>
+              <p>Your data is encrypted and stored securely in Firebase.</p>
+            </div>
             <div className="flex items-center justify-center space-x-4 mt-4">
               <div className="flex items-center">
                 <svg className="h-4 w-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
