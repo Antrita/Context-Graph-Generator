@@ -1,50 +1,43 @@
 import React, { useEffect, useRef, useState } from 'react';
-import ForceGraph3D from '3d-force-graph';
+import * as d3 from 'd3';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Network, Settings, RefreshCw, Download, FileText, Link2, Maximize2 } from 'lucide-react';
+import { Network, Settings, RefreshCw, Download, FileText, Link2 } from 'lucide-react';
 import { FileNode } from './FileExplorer';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
-interface GraphNode {
+interface GraphNode extends d3.SimulationNodeDatum {
   id: string;
   name: string;
   content: string;
   connections: number;
   size: number;
   group: number;
-  color?: string;
-  x?: number;
-  y?: number;
-  z?: number;
 }
 
-interface GraphLink {
+interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
   source: string | GraphNode;
   target: string | GraphNode;
   strength: number;
-  color?: string;
 }
 
 interface ContextGraphProps {
   files: FileNode[];
-  selectedFileId: string | null | undefined;
+  selectedFileId: string | null;
   onNodeClick: (fileId: string) => void;
 }
 
 type GraphMode = 'all' | 'single' | 'connected';
 
 const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNodeClick }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const graphRef = useRef<any>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   const [graphData, setGraphData] = useState<{ nodes: GraphNode[]; links: GraphLink[] }>({ nodes: [], links: [] });
   const [showSettings, setShowSettings] = useState(false);
   const [graphMode, setGraphMode] = useState<GraphMode>('all');
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [settings, setSettings] = useState({
     linkDistance: 150,
     nodeSize: 10,
@@ -52,20 +45,7 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
     showLabels: true,
     animateNodes: true,
     colorByConnections: true,
-    nodeOpacity: 0.8,
-    linkOpacity: 0.4,
-    particleSpeed: 0.01,
-    enableParticles: false,
   });
-
-  // Color schemes for nodes
-  const colorSchemes = {
-    default: ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'],
-    connections: (connections: number, maxConnections: number) => {
-      const intensity = Math.max(0.3, connections / maxConnections);
-      return `rgba(139, 92, 246, ${intensity})`;
-    }
-  };
 
   // Extract backlinks from content
   const extractBacklinks = (content: string): string[] => {
@@ -125,7 +105,7 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
     const links: GraphLink[] = [];
 
     // Create nodes from files
-    textFiles.forEach((file) => {
+    textFiles.forEach((file, index) => {
       const content = file.content || '';
       const wordCount = content.split(/\s+/).filter(word => word.length > 0).length;
       
@@ -135,7 +115,7 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
         content: content,
         connections: 0,
         size: Math.max(settings.nodeSize, Math.min(50, wordCount / 10)),
-        group: Math.floor(Math.random() * 5), // Random color groups
+        group: index % 5, // Color groups
       });
     });
 
@@ -194,21 +174,6 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
       }
     }
 
-    // Apply colors based on settings
-    const maxConnections = Math.max(...nodes.map(n => n.connections), 1);
-    nodes.forEach((node) => {
-      if (settings.colorByConnections) {
-        node.color = colorSchemes.connections(node.connections, maxConnections);
-      } else {
-        node.color = colorSchemes.default[node.group];
-      }
-    });
-
-    // Apply link colors
-    links.forEach(link => {
-      link.color = `rgba(255, 255, 255, ${settings.linkOpacity})`;
-    });
-
     return { nodes, links };
   };
 
@@ -242,95 +207,110 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
     return intersection.size / Math.max(set1.size, set2.size);
   };
 
-  const initializeGraph = () => {
-    if (!containerRef.current || !graphData.nodes.length) return;
+  const renderGraph = () => {
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove();
 
-    // Clear existing graph
-    if (graphRef.current) {
-      containerRef.current.innerHTML = '';
-    }
+    if (!graphData.nodes.length) return;
 
-    // Initialize the 3D force graph
-    const ForceGraph3DInstance = ForceGraph3D as any;
-    const graph = new ForceGraph3DInstance(containerRef.current)
-      .graphData(graphData)
-      .nodeId('id')
-      .nodeLabel((node: any) => `
-        <div style="
-          background: rgba(0, 0, 0, 0.8);
-          color: white;
-          padding: 8px 12px;
-          border-radius: 6px;
-          font-size: 12px;
-          max-width: 200px;
-          word-wrap: break-word;
-          border: 1px solid rgba(139, 92, 246, 0.5);
-        ">
-          <strong>${node.name}</strong><br/>
-          Connections: ${node.connections}<br/>
-          Words: ${node.content.split(/\s+/).length}
-        </div>
-      `)
-      .nodeColor((node: any) => node.color || '#8b5cf6')
-      .nodeOpacity(settings.nodeOpacity)
-      .nodeResolution(16)
-      .nodeVal((node: any) => node.size)
-      .linkColor((link: any) => link.color || `rgba(255, 255, 255, ${settings.linkOpacity})`)
-      .linkOpacity(settings.linkOpacity)
-      .linkWidth((link: any) => Math.sqrt(link.strength) * 2)
-      .linkDirectionalParticles(settings.enableParticles ? 2 : 0)
-      .linkDirectionalParticleSpeed(settings.particleSpeed)
-      .linkDirectionalParticleColor(() => 'rgba(139, 92, 246, 0.6)')
-      .onNodeClick((node: any) => {
-        onNodeClick(node.id);
-        // Animate camera to focus on clicked node
-        const distance = 250;
-        const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
-        graph.cameraPosition(
-          { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
-          node,
-          3000
-        );
+    const width = 800;
+    const height = 600;
+
+    svg.attr("width", width).attr("height", height);
+
+    const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+    const connectionColorScale = d3.scaleSequential(d3.interpolateViridis)
+      .domain([0, d3.max(graphData.nodes, d => d.connections) || 1]);
+
+    // Create simulation
+    const simulation = d3.forceSimulation(graphData.nodes)
+      .force("link", d3.forceLink(graphData.links).id((d: any) => d.id).distance(settings.linkDistance))
+      .force("charge", d3.forceManyBody().strength(-300))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("collision", d3.forceCollide(30));
+
+    // Create container group
+    const container = svg.append("g");
+
+    // Add zoom behavior
+    const zoom = d3.zoom()
+      .scaleExtent([0.1, 5])
+      .on("zoom", (event) => {
+        container.attr("transform", event.transform);
+      });
+
+    svg.call(zoom as any);
+
+    // Create links
+    const links = container.append("g")
+      .selectAll("line")
+      .data(graphData.links)
+      .enter().append("line")
+      .attr("stroke", "#6b7280")
+      .attr("stroke-opacity", 0.6)
+      .attr("stroke-width", (d: any) => Math.sqrt(d.strength * 10));
+
+    // Create nodes
+    const nodes = container.append("g")
+      .selectAll("circle")
+      .data(graphData.nodes)
+      .enter().append("circle")
+      .attr("r", d => d.size)
+      .attr("fill", d => settings.colorByConnections ? 
+        connectionColorScale(d.connections) : 
+        colorScale(d.group.toString())
+      )
+      .attr("stroke", d => d.id === selectedFileId ? "#8b5cf6" : "#374151")
+      .attr("stroke-width", d => d.id === selectedFileId ? 3 : 1.5)
+      .style("cursor", "pointer")
+      .on("click", (event, d) => {
+        onNodeClick(d.id);
       })
-      .onNodeHover((node: any) => {
-        if (containerRef.current) {
-          containerRef.current.style.cursor = node ? 'pointer' : 'default';
-        }
-      })
-      .enableNodeDrag(true)
-      .backgroundColor('rgba(0, 0, 0, 0)');
+      .call(d3.drag<SVGCircleElement, GraphNode>()
+        .on("start", (event, d) => {
+          if (!event.active) simulation.alphaTarget(0.3).restart();
+          d.fx = d.x;
+          d.fy = d.y;
+        })
+        .on("drag", (event, d) => {
+          d.fx = event.x;
+          d.fy = event.y;
+        })
+        .on("end", (event, d) => {
+          if (!event.active) simulation.alphaTarget(0);
+          d.fx = null;
+          d.fy = null;
+        })
+      );
 
-    // Configure forces
-    const forceLink = graph.d3Force('link');
-    const forceCharge = graph.d3Force('charge');
-    
-    if (forceLink) forceLink.distance(settings.linkDistance);
-    if (forceCharge) forceCharge.strength(-120);
+    // Add labels
+    const labels = container.append("g")
+      .selectAll("text")
+      .data(graphData.nodes)
+      .enter().append("text")
+      .text(d => d.name.replace(/\.[^/.]+$/, "")) // Remove file extension
+      .style("font-size", "12px")
+      .style("fill", "#e5e7eb")
+      .style("text-anchor", "middle")
+      .style("pointer-events", "none")
+      .style("opacity", settings.showLabels ? 1 : 0);
 
-    // Highlight selected node
-    if (selectedFileId) {
-      const selectedNode = graphData.nodes.find(n => n.id === selectedFileId);
-      if (selectedNode) {
-        graph.nodeColor((node: any) => {
-          if (node.id === selectedFileId) {
-            return '#ffffff';
-          }
-          return node.color || '#8b5cf6';
-        });
-      }
-    }
+    // Update positions on simulation tick
+    simulation.on("tick", () => {
+      links
+        .attr("x1", (d: any) => d.source.x)
+        .attr("y1", (d: any) => d.source.y)
+        .attr("x2", (d: any) => d.target.x)
+        .attr("y2", (d: any) => d.target.y);
 
-    // Store reference
-    graphRef.current = graph;
+      nodes
+        .attr("cx", d => d.x!)
+        .attr("cy", d => d.y!);
 
-    // Auto-rotate if enabled
-    if (settings.animateNodes) {
-      const controls = graph.controls();
-      if (controls) {
-        controls.autoRotate = true;
-        controls.autoRotateSpeed = 0.5;
-      }
-    }
+      labels
+        .attr("x", d => d.x!)
+        .attr("y", d => d.y! + 5);
+    });
   };
 
   const refreshGraph = () => {
@@ -339,41 +319,21 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
   };
 
   const exportGraph = () => {
-    if (!graphRef.current) return;
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svg);
+    const blob = new Blob([svgString], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob);
     
-    // Take a screenshot of the 3D graph
-    const canvas = containerRef.current?.querySelector('canvas');
-    if (canvas) {
-      const link = document.createElement('a');
-      link.download = 'context-graph-3d.png';
-      link.href = canvas.toDataURL();
-      link.click();
-    }
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "context-graph.svg";
+    a.click();
+    
+    URL.revokeObjectURL(url);
   };
-
-  const toggleFullscreen = () => {
-    if (!isFullscreen) {
-      if (containerRef.current?.requestFullscreen) {
-        containerRef.current.requestFullscreen();
-        setIsFullscreen(true);
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-        setIsFullscreen(false);
-      }
-    }
-  };
-
-  // Handle fullscreen change events
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
 
   useEffect(() => {
     const newData = analyzeConnections(files, graphMode);
@@ -381,29 +341,15 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
   }, [files, settings, graphMode, selectedFileId]);
 
   useEffect(() => {
-    initializeGraph();
+    renderGraph();
   }, [graphData, selectedFileId, settings]);
-
-  // Handle window resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (graphRef.current && containerRef.current) {
-        graphRef.current
-          .width(containerRef.current.clientWidth)
-          .height(containerRef.current.clientHeight);
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   return (
     <div className="h-full bg-gradient-card rounded-lg border border-border shadow-md flex flex-col">
       <div className="flex items-center justify-between p-4 border-b border-border">
         <div className="flex items-center gap-2">
           <Network className="h-5 w-5 text-accent" />
-          <h3 className="text-lg font-semibold">3D Context Graph</h3>
+          <h3 className="text-lg font-semibold">Context Graph</h3>
           <Badge variant="secondary">
             {graphData.nodes.length} nodes, {graphData.links.length} connections
           </Badge>
@@ -431,10 +377,6 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
           <Button onClick={exportGraph} size="sm" variant="outline">
             <Download className="h-4 w-4 mr-1" />
             Export
-          </Button>
-          <Button onClick={toggleFullscreen} size="sm" variant="outline">
-            <Maximize2 className="h-4 w-4 mr-1" />
-            Fullscreen
           </Button>
           <Collapsible open={showSettings} onOpenChange={setShowSettings}>
             <CollapsibleTrigger asChild>
@@ -471,26 +413,6 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
                   step={1}
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Node Opacity</label>
-                <Slider
-                  value={[settings.nodeOpacity]}
-                  onValueChange={([value]) => setSettings(s => ({ ...s, nodeOpacity: value }))}
-                  max={1}
-                  min={0.1}
-                  step={0.1}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Link Opacity</label>
-                <Slider
-                  value={[settings.linkOpacity]}
-                  onValueChange={([value]) => setSettings(s => ({ ...s, linkOpacity: value }))}
-                  max={1}
-                  min={0.1}
-                  step={0.1}
-                />
-              </div>
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium">Show Labels</label>
                 <Switch
@@ -499,24 +421,10 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
                 />
               </div>
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Auto Rotate</label>
-                <Switch
-                  checked={settings.animateNodes}
-                  onCheckedChange={(checked) => setSettings(s => ({ ...s, animateNodes: checked }))}
-                />
-              </div>
-              <div className="flex items-center justify-between">
                 <label className="text-sm font-medium">Color by Connections</label>
                 <Switch
                   checked={settings.colorByConnections}
                   onCheckedChange={(checked) => setSettings(s => ({ ...s, colorByConnections: checked }))}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">Link Particles</label>
-                <Switch
-                  checked={settings.enableParticles}
-                  onCheckedChange={(checked) => setSettings(s => ({ ...s, enableParticles: checked }))}
                 />
               </div>
             </div>
@@ -530,7 +438,7 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
             <Network className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold mb-2">No connections found</h3>
             <p className="text-muted-foreground mb-4">
-              Create some files with content to see connections in the 3D graph
+              Create some files with content to see connections in the graph
             </p>
             <Button onClick={refreshGraph} variant="outline">
               <RefreshCw className="h-4 w-4 mr-1" />
@@ -538,11 +446,9 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
             </Button>
           </div>
         ) : (
-          <div 
-            ref={containerRef} 
-            className="h-full bg-background/30 rounded border border-border/50 overflow-hidden"
-            style={{ minHeight: '400px' }}
-          />
+          <div className="h-full bg-background/30 rounded border border-border/50 overflow-hidden">
+            <svg ref={svgRef} className="w-full h-full" />
+          </div>
         )}
       </div>
     </div>
