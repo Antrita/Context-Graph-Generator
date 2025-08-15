@@ -125,7 +125,7 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
     const links: GraphLink[] = [];
 
     // Create nodes from files
-    textFiles.forEach((file, index) => {
+    textFiles.forEach((file) => {
       const content = file.content || '';
       const wordCount = content.split(/\s+/).filter(word => word.length > 0).length;
       
@@ -135,7 +135,7 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
         content: content,
         connections: 0,
         size: Math.max(settings.nodeSize, Math.min(50, wordCount / 10)),
-        group: index % 5, // Color groups
+        group: Math.floor(Math.random() * 5), // Random color groups
       });
     });
 
@@ -196,7 +196,7 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
 
     // Apply colors based on settings
     const maxConnections = Math.max(...nodes.map(n => n.connections), 1);
-    nodes.forEach((node, index) => {
+    nodes.forEach((node) => {
       if (settings.colorByConnections) {
         node.color = colorSchemes.connections(node.connections, maxConnections);
       } else {
@@ -251,9 +251,7 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
     }
 
     // Initialize the 3D force graph
-    const graph = ForceGraph3D({
-      extraRenderers: [new (window as any).THREE.CSS2DRenderer()]
-    })(containerRef.current)
+    const graph = ForceGraph3D()(containerRef.current)
       .graphData(graphData)
       .nodeId('id')
       .nodeLabel((node: any) => `
@@ -294,11 +292,19 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
         );
       })
       .onNodeHover((node: any) => {
-        containerRef.current!.style.cursor = node ? 'pointer' : 'default';
+        if (containerRef.current) {
+          containerRef.current.style.cursor = node ? 'pointer' : 'default';
+        }
       })
       .enableNodeDrag(true)
-      .d3Force('charge')?.strength(-120)
-      .d3Force('link')?.distance(settings.linkDistance);
+      .backgroundColor('rgba(0, 0, 0, 0)');
+
+    // Configure forces
+    const forceLink = graph.d3Force('link');
+    const forceCharge = graph.d3Force('charge');
+    
+    if (forceLink) forceLink.distance(settings.linkDistance);
+    if (forceCharge) forceCharge.strength(-120);
 
     // Highlight selected node
     if (selectedFileId) {
@@ -313,17 +319,16 @@ const ContextGraph: React.FC<ContextGraphProps> = ({ files, selectedFileId, onNo
       }
     }
 
-    // Apply custom styling
-    graph.backgroundColor('rgba(0, 0, 0, 0)');
-    
     // Store reference
     graphRef.current = graph;
 
     // Auto-rotate if enabled
     if (settings.animateNodes) {
       const controls = graph.controls();
-      controls.autoRotate = true;
-      controls.autoRotateSpeed = 0.5;
+      if (controls) {
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.5;
+      }
     }
   };
 
