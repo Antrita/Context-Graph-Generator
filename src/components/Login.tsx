@@ -15,25 +15,25 @@ const Login: React.FC = () => {
   }, [user, navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="flex justify-center mb-6">
-            <div className="p-3 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg">
+            <div className="p-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-lg">
               <Brain className="h-12 w-12 text-white" />
             </div>
           </div>
-          <h2 className="text-3xl font-extrabold text-gray-900">
+          <h2 className="text-3xl font-extrabold text-white">
             Welcome to Context Graph Generator
           </h2>
-          <p className="mt-4 text-lg text-gray-600">
+          <p className="mt-4 text-lg text-gray-300">
             Sign in to save and manage your context graphs securely in the cloud
           </p>
         </div>
         
         <div className="mt-8">
           {error && (
-            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg relative">
+            <div className="mb-4 bg-red-900/30 border border-red-700/50 text-red-300 px-4 py-3 rounded-lg relative backdrop-blur-sm">
               <div className="flex">
                 <div className="flex-shrink-0">
                   <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -41,10 +41,10 @@ const Login: React.FC = () => {
                   </svg>
                 </div>
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">
+                  <h3 className="text-sm font-medium text-red-300">
                     Authentication Error
                   </h3>
-                  <div className="mt-2 text-sm text-red-700">
+                  <div className="mt-2 text-sm text-red-200">
                     {error}
                   </div>
                 </div>
@@ -55,22 +55,15 @@ const Login: React.FC = () => {
           <button
             onClick={signInWithGoogle}
             disabled={loading}
-            className={`group relative w-full flex justify-center py-4 px-6 border border-transparent text-base font-medium rounded-lg text-white ${
+            className={`group relative w-full flex justify-center py-4 px-6 border text-base font-medium rounded-lg transition-all duration-200 transform ${
               loading 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50 shadow-md hover:shadow-lg'
-            } transition-all duration-200 transform ${
-              loading ? '' : 'hover:scale-105'
+                ? 'bg-gray-700 border-gray-600 text-gray-400 cursor-not-allowed' 
+                : 'bg-white/10 border-white/20 text-white hover:bg-white/20 hover:border-white/30 backdrop-blur-sm hover:scale-105 shadow-lg hover:shadow-xl'
             }`}
-            style={!loading ? {
-              background: 'white',
-              color: '#374151',
-              border: '1px solid #D1D5DB'
-            } : {}}
           >
             <span className="absolute left-0 inset-y-0 flex items-center pl-4">
               {loading ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-600"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400"></div>
               ) : (
                 <svg
                   className="h-5 w-5"
@@ -92,10 +85,10 @@ const Login: React.FC = () => {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-gray-600" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-500">
+                <span className="px-2 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-800 text-gray-400">
                   or
                 </span>
               </div>
@@ -104,11 +97,11 @@ const Login: React.FC = () => {
           
           <Link
             to="/"
-            className="group relative w-full flex justify-center py-3 px-6 border border-gray-300 text-base font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200 transform hover:scale-105 mt-4"
+            className="group relative w-full flex justify-center py-3 px-6 border border-gray-600 text-base font-medium rounded-lg text-gray-300 bg-gray-800/30 hover:bg-gray-700/40 backdrop-blur-sm transition-all duration-200 transform hover:scale-105 mt-4 shadow-lg hover:shadow-xl"
           >
             <span className="absolute left-0 inset-y-0 flex items-center pl-4">
               <svg
-                className="h-5 w-5 text-gray-400 group-hover:text-gray-600"
+                className="h-5 w-5 text-gray-400 group-hover:text-gray-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -127,51 +120,54 @@ const Login: React.FC = () => {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-gray-600" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gradient-to-br from-blue-50 to-indigo-100 text-gray-500">
+                <span className="px-2 bg-gradient-to-br from-gray-900 via-purple-900 to-gray-800 text-gray-400">
                   Secure authentication with Google
                 </span>
               </div>
             </div>
           </div>
           
-          <div className="text-center text-xs text-gray-500 mt-6 space-y-2">
-            <div>
-              <p className="font-medium text-gray-700">Guest Mode:</p>
-              <p>• Create and edit graphs locally</p>
-              <p>• View graph visualizations</p>
-              <p className="text-orange-600">• Cannot save or sync data</p>
+          <div className="text-center text-xs text-gray-400 mt-6 space-y-4">
+            <div className="bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50">
+              <p className="font-medium text-gray-300 mb-2">Guest Mode:</p>
+              <p className="text-green-400">• Create and edit graphs locally</p>
+              <p className="text-green-400">• View graph visualizations</p>
+              <p className="text-orange-400">• Cannot save or sync data</p>
             </div>
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <p className="font-medium text-gray-700">Signed-in Benefits:</p>
-              <p>• Save graphs to the cloud</p>
-              <p>• Sync across devices</p>
-              <p>• Access from anywhere</p>
+            
+            <div className="bg-gray-800/30 backdrop-blur-sm rounded-lg p-4 border border-gray-700/50">
+              <p className="font-medium text-gray-300 mb-2">Signed-in Benefits:</p>
+              <p className="text-purple-400">• Save graphs to the cloud</p>
+              <p className="text-purple-400">• Sync across devices</p>
+              <p className="text-purple-400">• Access from anywhere</p>
             </div>
-            <div className="mt-4 pt-4 border-t border-gray-200">
-              <p>By signing in, you agree to our Terms of Service and Privacy Policy.</p>
-              <p>Your data is encrypted and stored securely in Firebase.</p>
+            
+            <div className="pt-4 border-t border-gray-700">
+              <p className="text-gray-500">By signing in, you agree to our Terms of Service and Privacy Policy.</p>
+              <p className="text-gray-500">Your data is encrypted and stored securely in Firebase.</p>
             </div>
-            <div className="flex items-center justify-center space-x-4 mt-4">
+            
+            <div className="flex items-center justify-center space-x-6 mt-4">
               <div className="flex items-center">
-                <svg className="h-4 w-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="h-4 w-4 text-green-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-                <span className="text-xs">Secure</span>
+                <span className="text-xs text-gray-300">Secure</span>
               </div>
               <div className="flex items-center">
-                <svg className="h-4 w-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="h-4 w-4 text-green-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-                <span className="text-xs">Private</span>
+                <span className="text-xs text-gray-300">Private</span>
               </div>
               <div className="flex items-center">
-                <svg className="h-4 w-4 text-green-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="h-4 w-4 text-green-400 mr-1" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                 </svg>
-                <span className="text-xs">Reliable</span>
+                <span className="text-xs text-gray-300">Reliable</span>
               </div>
             </div>
           </div>
