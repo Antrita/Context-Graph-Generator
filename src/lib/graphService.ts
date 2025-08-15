@@ -22,8 +22,8 @@ export interface GraphData {
   graphData: any; // Your graph structure
   tags?: string[];
   isPublic?: boolean;
-  createdAt?: Timestamp;
-  updatedAt?: Timestamp;
+  createdAt?: Timestamp | any;
+  updatedAt?: Timestamp | any;
 }
 
 class GraphService {
